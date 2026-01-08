@@ -90,3 +90,28 @@ app.put('/payments/:id', async (req, res) => {
         if (connection) await connection.end();
     }
 });
+app.delete('/payments/:id', async (req, res) => {
+    const { id } = req.params;
+
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+
+        const [result] = await connection.execute(
+            'DELETE FROM payments WHERE paymentid = ?',
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: `No payment found with paymentid ${id}` });
+        }
+
+        res.json({ message: `Payment ${id} deleted successfully` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error - could not delete payment', error: err.message });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
