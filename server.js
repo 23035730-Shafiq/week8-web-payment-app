@@ -59,7 +59,6 @@ app.post('/payments', async (req, res) => {
     }
 });
 
-// PUT update payment by id (Update)
 app.put('/payments/:id', async (req, res) => {
     const { id } = req.params;
     const { amount, payment_status, payment_method } = req.body;
@@ -75,12 +74,12 @@ app.put('/payments/:id', async (req, res) => {
         connection = await mysql.createConnection(dbConfig);
 
         const [result] = await connection.execute(
-            'UPDATE payments SET amount = ?, payment_status = ?, payment_method = ? WHERE payment_id = ?',
+            'UPDATE payments SET amount = ?, payment_status = ?, payment_method = ? WHERE paymentid = ?',
             [amount, payment_status, payment_method, id]
         );
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: `No payment found with payment_id ${id}` });
+            return res.status(404).json({ message: `No payment found with paymentid ${id}` });
         }
 
         res.json({ message: `Payment ${id} updated successfully` });
