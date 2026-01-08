@@ -58,3 +58,36 @@ app.post('/payments', async (req, res) => {
         if (connection) await connection.end();
     }
 });
+
+// PUT update payment by id (Update)
+app.put('/payments/:id', async (req, res) => {
+    const { id } = req.params;
+    const { amount, payment_status, payment_method } = req.body;
+
+    if (amount === undefined || !payment_status || !payment_method) {
+        return res.status(400).json({
+            message: 'amount, payment_status, and payment_method are required',
+        });
+    }
+
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+
+        const [result] = await connection.execute(
+            'UPDATE payments SET amount = ?, payment_status = ?, payment_method = ? WHERE payment_id = ?',
+            [amount, payment_status, payment_method, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: `No payment found with payment_id ${id}` });
+        }
+
+        res.json({ message: `Payment ${id} updated successfully` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error - could not update payment', error: err.message });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
